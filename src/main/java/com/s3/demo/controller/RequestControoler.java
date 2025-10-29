@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.s3.demo.service.S3Service;
 
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 
@@ -38,12 +39,14 @@ public class RequestControoler {
 		return "Fial To upload on S3";
 	}
 	
-	@GetMapping("/downlad")
+	@GetMapping("/download")
 	public ResponseEntity<?> downloadS3Object(@RequestParam("fileName") String objectKey) {
 		try {
-			byte[] response = s3Service.downloadObjectFromS3(objectKey);
-			if(response.length>0) {
-				return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + objectKey + "\"").body(response);
+			ResponseInputStream<GetObjectResponse> response = s3Service.downloadObjectFromS3(objectKey);
+			if(response!=null) {
+				return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + objectKey + "\"")
+						.contentType(MediaType.APPLICATION_OCTET_STREAM)
+						.contentLength(response.response().contentLength()).body(response);
 			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -52,6 +55,24 @@ public class RequestControoler {
 		return ResponseEntity.internalServerError().body("Fial to download File or Not Present..");
 	}
 
+	@GetMapping("/view")
+	public ResponseEntity<?> viewS3Object(@RequestParam("fileName") String objectKey) {
+		try {
+			ResponseInputStream<GetObjectResponse> resp = s3Service.downloadObjectFromS3(objectKey);
+			if(resp!=null) {
+				GetObjectResponse response = resp.response();
+				System.out.println(response);
+				System.out.println(response.contentType());
+				return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"inline; filename=\"" + objectKey + "\"")
+						.contentType(MediaType.parseMediaType(response.contentType()))
+						.contentLength(response.contentLength()).body(resp);
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		return ResponseEntity.internalServerError().body("Fial to download File or Not Present..");
+	}
 	
 	
 	

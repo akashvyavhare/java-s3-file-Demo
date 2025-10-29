@@ -42,15 +42,15 @@ public class S3ServiceImpl implements S3Service{
 	}
 
 	@Override
-	public byte[] downloadObjectFromS3(String objectKey) {
+	public ResponseInputStream<GetObjectResponse> downloadObjectFromS3(String objectKey) {
 		try {
 			GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
 			ResponseInputStream<GetObjectResponse> response = s3Client.getObject(getObjectRequest);
-			return response.readAllBytes();
+			return response;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
-			return new byte[0];
+			return null;
 		}
 		
 	}
