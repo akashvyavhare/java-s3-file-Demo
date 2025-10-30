@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.s3.demo.service.S3Service;
+import com.s3.demo.utils.FileOprationUtils;
 
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
@@ -47,7 +48,7 @@ public class RequestControoler {
 			if(response!=null) {
 				return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + objectKey + "\"")
 						.contentType(MediaType.APPLICATION_OCTET_STREAM)
-						.contentLength(response.response().contentLength()).body(response);
+						.contentLength(response.response().contentLength()).body(response.readAllBytes());
 			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -60,13 +61,14 @@ public class RequestControoler {
 	public ResponseEntity<?> viewS3Object(@RequestParam("fileName") String objectKey) {
 		try {
 			ResponseInputStream<GetObjectResponse> resp = s3Service.downloadObjectFromS3(objectKey);
+			String mediaType =  FileOprationUtils.getFileMediaType(objectKey);
 			if(resp!=null) {
 				GetObjectResponse response = resp.response();
 				System.out.println(response);
 				System.out.println(response.contentType());
 				return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"inline; filename=\"" + objectKey + "\"")
-						.contentType(MediaType.parseMediaType(response.contentType()))
-						.contentLength(response.contentLength()).body(resp);
+						.contentType(MediaType.parseMediaType(mediaType))
+						.body(resp.readAllBytes());
 			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
