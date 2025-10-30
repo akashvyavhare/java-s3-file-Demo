@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,11 +72,22 @@ public class RequestControoler {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
-		return ResponseEntity.internalServerError().body("Fial to download File or Not Present..");
+		return ResponseEntity.internalServerError().body("Fail to show File or Not Present..");
 	}
 	
-	
-	
+	@DeleteMapping("/delete")
+	public String deleteS3Object(@RequestParam("fileName") String objectKey) {
+		try {
+			boolean isDeleted = s3Service.deleteObjectFromS3(objectKey);
+			if(isDeleted) {
+				return "File Sucessfully Deleted..";
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		return "Fail to delete File..";	
+	}
 	
 	
 	

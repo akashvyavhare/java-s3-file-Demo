@@ -10,6 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -37,8 +39,18 @@ public class S3ServiceImpl implements S3Service{
 
 	@Override
 	public boolean deleteObjectFromS3(String objectKey) {
-		// TODO Auto-generated method stub
-		return false;
+
+		try {
+			DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(s3BucketName).key(objectKey).build();
+			DeleteObjectResponse deleteObject = s3Client.deleteObject(deleteObjectRequest);
+			System.out.println("Delete Object Responce - "+deleteObject);
+			return true;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+		
 	}
 
 	@Override
